@@ -48,7 +48,7 @@ export function GroupPage({ children, headerButtons, save, cancel, _id, i18nLabe
 
 		<Page.Content>
 			<Box style={useMemo(() => ({ margin: '0 auto', width: '100%', maxWidth: '590px' }), [])}>
-				{t.has(i18nDescription) && <Paragraph hintColor>{t(i18nDescription)}</Paragraph>}
+				{t.has(i18nDescription) && <Paragraph textColor='hint'>{t(i18nDescription)}</Paragraph>}
 
 				<Accordion className='page-settings'>
 					{children}
