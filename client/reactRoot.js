@@ -1,9 +1,10 @@
 import { Meteor } from 'meteor/meteor';
 import { Blaze } from 'meteor/blaze';
 import { HTML } from 'meteor/htmljs';
+import { BlazeLayout } from 'meteor/kadira:blaze-layout';
 import { ReactiveVar } from 'meteor/reactive-var';
-import { Template } from 'meteor/templating';
 import { Random } from 'meteor/random';
+import { Template } from 'meteor/templating';
 import { Tracker } from 'meteor/tracker';
 
 const getRootNode = () => {
@@ -19,51 +20,59 @@ const getRootNode = () => {
 	return rootNode;
 };
 
-const portalsSet = new Set();
+const portalsMap = new Map();
 const portalsDep = new Tracker.Dependency();
 
-export const createTemplateForComponent = async (
-	component,
-	props = {},
+export const createTemplateFromLazyComponent = (
+	factory,
 	// eslint-disable-next-line new-cap
 	renderContainerView = () => HTML.DIV(),
 ) => {
-	const name = component.displayName || component.name || Random.id();
+	const template = new Blaze.Template(Random.id(), renderContainerView);
 
-	if (Template[name]) {
-		Template[name].props.set(props);
-		return name;
-	}
+	template.onRendered(function() {
+		const builder = new ReactiveVar(null);
 
-	Template[name] = new Blaze.Template(name, renderContainerView);
+		Promise.all([
+			import('react'),
+			import('react-dom'),
+			factory(),
+		]).then(([{ createElement }, { createPortal }, component]) => {
+			if (!this.firstNode) {
+				return;
+			}
 
-	Template[name].props = new ReactiveVar(props);
+			builder.set((props) => createPortal(createElement(component, props), this.firstNode));
+		}, console.error);
 
-	const { createElement } = await import('react');
-	const { createPortal } = await import('react-dom');
+		this.autorun(() => {
+			const createPortal = builder.get();
 
-	Template[name].onRendered(() => {
-		Template.instance().autorun(() => {
-			portalsSet.delete(Template.instance().portal);
+			if (!createPortal) {
+				return;
+			}
 
-			Template.instance().portal = createPortal(
-				createElement(component, Template[name].props.get()),
-				Template.instance().firstNode,
-			);
-
-			portalsSet.add(Template.instance().portal);
+			const props = Template.currentData();
+			portalsMap.set(this, createPortal(props));
 			portalsDep.changed();
 		});
 	});
 
-	Template[name].onDestroyed(() => {
-		if (Template.instance().portal) {
-			portalsSet.delete(Template.instance().portal);
-			portalsDep.changed();
-		}
+	template.onDestroyed(function() {
+		portalsMap.delete(this);
+		portalsDep.changed();
 	});
 
-	return name;
+	return template;
+};
+
+export const renderComponentIntoLayout = (name, factory, { renderContainerView, layoutName = name, regions } = {}) => {
+	if (!Template[name]) {
+		Template[name] = createTemplateFromLazyComponent(factory, renderContainerView);
+		Template[name].viewName = name;
+	}
+
+	BlazeLayout.render(layoutName, regions);
 };
 
 Meteor.startup(() => {
@@ -71,17 +80,23 @@ Meteor.startup(() => {
 	Tracker.autorun(async () => {
 		portalsDep.depend();
 
-		if (portalsSet.size === 0 && pristine) {
+		if (portalsMap.size === 0 && pristine) {
 			return;
 		}
 
 		pristine = false;
 
 		const rootNode = getRootNode();
-		const { createElement } = await import('react');
-		const { render } = await import('react-dom');
-		const { MeteorProvider } = await import('./providers/MeteorProvider');
+		const [
+			{ createElement },
+			{ render },
+			{ MeteorProvider },
+		] = await Promise.all([
+			import('react'),
+			import('react-dom'),
+			import('./providers/MeteorProvider'),
+		]);
 
-		render(createElement(MeteorProvider, {}, Array.from(portalsSet)), rootNode);
+		render(createElement(MeteorProvider, {}, ...portalsMap.values()), rootNode);
 	});
 });

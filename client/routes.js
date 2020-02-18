@@ -11,7 +11,7 @@ import { KonchatNotification } from '../app/ui';
 import { ChatSubscription } from '../app/models';
 import { roomTypes } from '../app/utils';
 import { call } from '../app/ui-utils';
-import { createTemplateForComponent } from './reactRoot';
+import { renderComponentIntoLayout } from './reactRoot';
 
 const getRoomById = mem((rid) => call('getRoomById', rid));
 
@@ -173,33 +173,41 @@ FlowRouter.route('/invite/:hash', {
 
 FlowRouter.route('/setup-wizard/:step?', {
 	name: 'setup-wizard',
-	action: async () => {
-		const { SetupWizardRoute } = await import('./components/setupWizard/SetupWizardRoute');
-		BlazeLayout.render(await createTemplateForComponent(SetupWizardRoute));
+	action: () => {
+		renderComponentIntoLayout('SetupWizardRoute', async () => {
+			const { SetupWizardRoute } = await import('./components/setupWizard/SetupWizardRoute');
+			return SetupWizardRoute;
+		});
 	},
 });
 
 FlowRouter.route('/admin/:group?', {
 	name: 'admin',
-	action: async ({ group = 'info' } = {}) => {
+	action: ({ group = 'info' } = {}) => {
 		switch (group) {
 			case 'info': {
-				const { InformationRoute } = await import('./components/admin/info/InformationRoute');
-				BlazeLayout.render('main', { center: await createTemplateForComponent(InformationRoute) });
+				renderComponentIntoLayout('InformationRoute', async () => {
+					const { InformationRoute } = await import('./components/admin/info/InformationRoute');
+					return InformationRoute;
+				}, { layoutName: 'main', regions: { center: 'InformationRoute' } });
 				break;
 			}
 
 			default: {
-				const { SettingsRoute } = await import('./components/admin/settings/SettingsRoute');
-				BlazeLayout.render('main', { center: await createTemplateForComponent(SettingsRoute, { group }) });
+				renderComponentIntoLayout('SettingsRoute', async () => {
+					const { SettingsRoute } = await import('./components/admin/settings/SettingsRoute');
+					return SettingsRoute;
+				}, { layoutName: 'main', regions: { center: 'SettingsRoute' } });
 			}
 		}
 	},
 });
 
 FlowRouter.notFound = {
-	action: async () => {
-		const { PageNotFound } = await import('./components/pageNotFound/PageNotFound');
-		BlazeLayout.render(await createTemplateForComponent(PageNotFound));
+	action: () => {
+		renderComponentIntoLayout('PageNotFound', async () => {
+			const { PageNotFound } = await import('./components/pageNotFound/PageNotFound');
+			return PageNotFound;
+		});
 	},
 };

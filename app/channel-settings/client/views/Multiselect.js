@@ -1,23 +1,11 @@
-import './Multiselect.html';
+import { HTML } from 'meteor/htmljs';
 import { Template } from 'meteor/templating';
 
-import { MultiSelectSettingInput } from '../../../../client/components/admin/settings/inputs/MultiSelectSettingInput';
+import { createTemplateFromLazyComponent } from '../../../../client/reactRoot';
 
-
-Template.Multiselect.onRendered(async function() {
-	const { MeteorProvider } = await import('../../../../client/providers/MeteorProvider');
-	const React = await import('react');
-	const ReactDOM = await import('react-dom');
-	this.container = this.firstNode;
-	this.autorun(() => {
-		ReactDOM.render(React.createElement(MeteorProvider, {
-			children: React.createElement(MultiSelectSettingInput, Template.currentData()),
-		}), this.container);
-	});
-});
-
-
-Template.Multiselect.onDestroyed(async function() {
-	const ReactDOM = await import('react-dom');
-	this.container && ReactDOM.unmountComponentAtNode(this.container);
-});
+Template.Multiselect = createTemplateFromLazyComponent(async () => {
+	const {
+		MultiSelectSettingInput,
+	} = await import('../../../../client/components/admin/settings/inputs/MultiSelectSettingInput');
+	return MultiSelectSettingInput;
+}, () => HTML.DIV.call(null, { class: 'rc-multiselect', style: 'display: flex;' }));
