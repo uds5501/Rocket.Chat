@@ -4,6 +4,8 @@ import { UiKitMessage as uiKitMessage, kitContext, UiKitModal as uiKitModal, mes
 import { uiKitText } from '@rocket.chat/ui-kit';
 import { Modal, AnimatedVisibility, ButtonGroup, Button, Box } from '@rocket.chat/fuselage';
 import { useUniqueId } from '@rocket.chat/fuselage-hooks';
+import { ReactiveDict } from 'meteor/reactive-dict';
+import { ReactiveVar } from 'meteor/reactive-var';
 
 import { renderMessageBody } from '../../../ui-utils/client';
 import { getURL } from '../../../utils/lib/getURL';
@@ -196,3 +198,136 @@ export const MessageBlock = (props) => {
 		{uiKitMessage(props.blocks)}
 	</kitContext.Provider>;
 };
+
+export function ModalBlock({ errors: initialErrors, ...initialBlockState }) {
+	const { viewId, appId } = initialBlockState;
+
+	const [state] = React.useState(() => new ReactiveVar(initialBlockState));
+	const [errors] = React.useState(() => new ReactiveVar(initialErrors));
+
+	const filterInputFields = ({ element, elements = [] }) => {
+		if (element && element.initialValue) {
+			return true;
+		}
+		if (elements.length && elements.map((element) => ({ element })).filter(filterInputFields).length) {
+			return true;
+		}
+	};
+
+	const mapElementToState = ({ element, blockId, elements = [] }) => {
+		if (elements.length) {
+			return elements.map((element) => ({ element, blockId })).filter(filterInputFields).map(mapElementToState);
+		}
+		return [element.actionId, { value: element.initialValue, blockId }];
+	};
+
+	const groupStateByBlockIdMap = (obj, [key, { blockId, value }]) => {
+		obj[blockId] = obj[blockId] || {};
+		obj[blockId][key] = value;
+		return obj;
+	};
+
+	const groupStateByBlockId = (obj) => Object.entries(obj).reduce(groupStateByBlockIdMap, {});
+
+	const [formState] = React.useState(() => new ReactiveDict(
+		initialBlockState.view.blocks
+			.filter(filterInputFields)
+			.map(mapElementToState)
+			.reduce((obj, el) => {
+				if (Array.isArray(el[0])) {
+					return { ...obj, ...Object.fromEntries(el) };
+				}
+				return { ...obj, [el[0]]: el[1] };
+			}, {})));
+
+	React.useEffect(() => {
+		const handleUpdate = ({ type, ...blockState }) => {
+			if (type === 'errors') {
+				errors.set(blockState.errors);
+				return;
+			}
+
+			return state.set(blockState);
+		};
+
+		ActionManager.on(viewId, handleUpdate);
+
+		return () => {
+			ActionManager.off(viewId, handleUpdate);
+		};
+	}, []);
+
+	const prevent = (e) => {
+		if (e) {
+			(e.nativeEvent || e).stopImmediatePropagation();
+			e.stopPropagation();
+			e.preventDefault();
+		}
+	};
+
+	return React.createElement(
+		modalBlockWithContext({
+			onCancel: (e) => {
+				prevent(e);
+				return ActionManager.triggerCancel({
+					appId,
+					viewId,
+					view: {
+						...state.get().view,
+						id: viewId,
+						state: groupStateByBlockId(formState.all()),
+					},
+				});
+			},
+			onClose: (e) => {
+				prevent(e);
+				return ActionManager.triggerCancel({
+					appId,
+					viewId,
+					view: {
+						...state.get().view,
+						id: viewId,
+						state: groupStateByBlockId(formState.all()),
+					},
+					isCleared: true,
+				});
+			},
+			onSubmit: (e) => {
+				prevent(e);
+				ActionManager.triggerSubmitView({
+					viewId,
+					appId,
+					payload: {
+						view: {
+							...state.get().view,
+							id: viewId,
+							state: groupStateByBlockId(formState.all()),
+						},
+					},
+				});
+			},
+			action: ({ actionId, appId, value, blockId, mid = initialBlockState.mid }) => ActionManager.triggerBlockAction({
+				container: {
+					type: UIKitIncomingInteractionContainerType.VIEW,
+					id: viewId,
+				},
+				actionId,
+				appId,
+				value,
+				blockId,
+				mid,
+			}),
+			state: ({ actionId, value, /* ,appId, */ blockId = 'default' }) => {
+				formState.set(actionId, {
+					blockId,
+					value,
+				});
+			},
+			...initialBlockState,
+		}),
+		{
+			data: () => ({ ...state.get(), errors: errors.get() }),
+			values: () => formState.all(),
+		},
+	);
+}
