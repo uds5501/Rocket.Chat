@@ -136,7 +136,7 @@ export function AdminUserInformationStep({ step, title, active }) {
 							placeholder={t('Type_your_name')}
 							value={name}
 							onChange={({ currentTarget: { value } }) => setName(value)}
-							error={!isNameValid}
+							error={!isNameValid ? 'true' : null}
 						/>
 					</Field.Row>
 				</Field>
@@ -149,7 +149,7 @@ export function AdminUserInformationStep({ step, title, active }) {
 							placeholder={t('Type_your_username')}
 							value={username}
 							onChange={({ currentTarget: { value } }) => setUsername(value)}
-							error={!isUsernameValid}
+							error={!isUsernameValid ? 'true' : null}
 						/>
 					</Field.Row>
 					{!isUsernameValid && <Field.Error>{t('Invalid_username')}</Field.Error>}
@@ -163,7 +163,7 @@ export function AdminUserInformationStep({ step, title, active }) {
 							placeholder={t('Type_your_email')}
 							value={email}
 							onChange={({ currentTarget: { value } }) => setEmail(value)}
-							error={!isEmailValid}
+							error={!isEmailValid ? 'true' : null}
 						/>
 					</Field.Row>
 					{!isEmailValid && <Field.Error>{t('Invalid_email')}</Field.Error>}
@@ -177,7 +177,7 @@ export function AdminUserInformationStep({ step, title, active }) {
 							placeholder={t('Type_your_password')}
 							value={password}
 							onChange={({ currentTarget: { value } }) => setPassword(value)}
-							error={!isPasswordValid}
+							error={!isPasswordValid ? 'true' : null}
 						/>
 					</Field.Row>
 				</Field>

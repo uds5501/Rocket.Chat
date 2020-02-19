@@ -6,7 +6,7 @@ import { useTranslation } from '../../contexts/TranslationContext';
 export function StepHeader({ number, title }) {
 	const t = useTranslation();
 
-	return <Margins blockEnd='32'>
+	return <Margins blockEnd='x32'>
 		<Box is='header' className='SetupWizard__StepHeader'>
 			<Box is='p' textStyle='c1' textColor='hint'>
 				{t('Step')} {number}
