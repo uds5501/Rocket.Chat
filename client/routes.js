@@ -1,11 +1,12 @@
 import mem from 'mem';
 import s from 'underscore.string';
-import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
-import { Tracker } from 'meteor/tracker';
-import { FlowRouter } from 'meteor/kadira:flow-router';
+import { HTML } from 'meteor/htmljs';
 import { BlazeLayout } from 'meteor/kadira:blaze-layout';
+import { FlowRouter } from 'meteor/kadira:flow-router';
+import { Meteor } from 'meteor/meteor';
 import { Session } from 'meteor/session';
+import { Tracker } from 'meteor/tracker';
 
 import { KonchatNotification } from '../app/ui';
 import { ChatSubscription } from '../app/models';
@@ -184,12 +185,18 @@ FlowRouter.route('/setup-wizard/:step?', {
 FlowRouter.route('/admin/:group?', {
 	name: 'admin',
 	action: ({ group = 'info' } = {}) => {
+		const style = 'overflow: hidden; flex: 1 1 auto; height: 1%;';
+
 		switch (group) {
 			case 'info': {
 				renderComponentIntoLayout('InformationRoute', async () => {
 					const { InformationRoute } = await import('./components/admin/info/InformationRoute');
 					return InformationRoute;
-				}, { layoutName: 'main', regions: { center: 'InformationRoute' } });
+				}, {
+					layoutName: 'main',
+					regions: { center: 'InformationRoute' },
+					renderContainerView: () => HTML.DIV.call(null, { style }),
+				});
 				break;
 			}
 
@@ -197,7 +204,11 @@ FlowRouter.route('/admin/:group?', {
 				renderComponentIntoLayout('SettingsRoute', async () => {
 					const { SettingsRoute } = await import('./components/admin/settings/SettingsRoute');
 					return SettingsRoute;
-				}, { layoutName: 'main', regions: { center: 'SettingsRoute' } });
+				}, {
+					layoutName: 'main',
+					regions: { center: 'SettingsRoute' },
+					renderContainerView: () => HTML.DIV.call(null, { style }),
+				});
 			}
 		}
 	},
