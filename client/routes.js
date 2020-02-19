@@ -12,7 +12,7 @@ import { KonchatNotification } from '../app/ui';
 import { ChatSubscription } from '../app/models';
 import { roomTypes } from '../app/utils';
 import { call } from '../app/ui-utils';
-import { renderComponentIntoLayout } from './reactRoot';
+import { renderComponentIntoLayout } from './lib/renderComponentIntoLayout';
 
 const getRoomById = mem((rid) => call('getRoomById', rid));
 

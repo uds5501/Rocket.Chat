@@ -22,10 +22,9 @@ import './routes';
 import './startup/emailVerification';
 import './startup/i18n';
 import './startup/loginViaQuery';
+import './startup/reactRoot';
 import './startup/roomObserve';
 import './startup/startup';
 import './startup/unread';
 import './startup/userSetUtcOffset';
 import './startup/usersObserve';
-
-import './reactRoot';
