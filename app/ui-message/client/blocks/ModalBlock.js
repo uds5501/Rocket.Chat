@@ -1,12 +1,12 @@
 import { UIKitIncomingInteractionContainerType } from '@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionContainer';
+import { Blaze } from 'meteor/blaze';
+import { HTML } from 'meteor/htmljs';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Template } from 'meteor/templating';
 
 import * as ActionManager from '../ActionManager';
 import { modalBlockWithContext } from './MessageBlock';
-import './ModalBlock.html';
-
 
 const prevent = (e) => {
 	if (e) {
@@ -15,6 +15,8 @@ const prevent = (e) => {
 		e.preventDefault();
 	}
 };
+
+Template.ModalBlock = new Blaze.Template('ModalBlock', () => HTML.DIV.call(null, { class: 'js-modal-block' }));
 
 Template.ModalBlock.onRendered(async function() {
 	const React = await import('react');
@@ -69,7 +71,9 @@ Template.ModalBlock.onRendered(async function() {
 		obj[blockId][key] = value;
 		return obj;
 	};
+
 	const groupStateByBlockId = (obj) => Object.entries(obj).reduce(groupStateByBlockIdMap, {});
+
 	ReactDOM.render(
 		React.createElement(
 			modalBlockWithContext({
@@ -136,6 +140,7 @@ Template.ModalBlock.onRendered(async function() {
 		this.node,
 	);
 });
+
 Template.ModalBlock.onDestroyed(async function() {
 	const ReactDOM = await import('react-dom');
 	this.node && ReactDOM.unmountComponentAtNode(this.node);

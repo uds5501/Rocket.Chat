@@ -1,11 +1,13 @@
 import { UIKitIncomingInteractionContainerType } from '@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionContainer';
+import { Blaze } from 'meteor/blaze';
+import { HTML } from 'meteor/htmljs';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Template } from 'meteor/templating';
 
 import * as ActionManager from '../ActionManager';
-import './Blocks.html';
 import { messageBlockWithContext } from './MessageBlock';
 
+Template.Blocks = new Blaze.Template('Blocks', () => HTML.DIV.call(null, { class: 'js-block-wrapper' }));
 
 Template.Blocks.onRendered(async function() {
 	const React = await import('react');
