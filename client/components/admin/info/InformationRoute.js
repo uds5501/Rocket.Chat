@@ -4,7 +4,7 @@ import { usePermission } from '../../../contexts/AuthorizationContext';
 import { useMethod, useServerInformation, useEndpoint } from '../../../contexts/ServerContext';
 import { useAdminSideNav } from '../../../hooks/useAdminSideNav';
 import { InformationPage } from './InformationPage';
-import { downloadJsonAsAFile } from '../../../helpers/download';
+import { downloadJsonAsAFile } from '../../../lib/downloadJsonAsAFile';
 
 export function InformationRoute() {
 	useAdminSideNav();
