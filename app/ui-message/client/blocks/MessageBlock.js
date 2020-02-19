@@ -1,3 +1,4 @@
+import { UIKitIncomingInteractionContainerType } from '@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionContainer';
 import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import { UiKitMessage as uiKitMessage, kitContext, UiKitModal as uiKitModal, messageParser, modalParser, UiKitComponent } from '@rocket.chat/fuselage-ui-kit';
 import { uiKitText } from '@rocket.chat/ui-kit';
@@ -7,6 +8,7 @@ import { useUniqueId } from '@rocket.chat/fuselage-hooks';
 import { renderMessageBody } from '../../../ui-utils/client';
 import { getURL } from '../../../utils/lib/getURL';
 import { useReactiveValue } from '../../../../client/hooks/useReactiveValue';
+import * as ActionManager from '../ActionManager';
 
 const focusableElementsString =	'a[href]:not([tabindex="-1"]), area[href]:not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), iframe, object, embed, [tabindex]:not([tabindex="-1"]), [contenteditable]';
 
@@ -22,20 +24,11 @@ messageParser.text = ({ text, type } = {}) => {
 
 modalParser.text = messageParser.text;
 
-const contextDefault = {
-	action: console.log,
-	state: (data) => {
-		console.log('state', data);
-	},
-};
-export const messageBlockWithContext = (context) => (props) => {
-	const data = useReactiveValue(props.data);
-	return (
-		<kitContext.Provider value={context}>
-			{uiKitMessage(data.blocks)}
-		</kitContext.Provider>
-	);
-};
+export const messageBlockWithContext = (context) => ({ data }) => (
+	<kitContext.Provider value={context}>
+		{uiKitMessage(data.blocks)}
+	</kitContext.Provider>
+);
 
 const textParser = uiKitText(new class {
 	plain_text({ text }) {
@@ -177,8 +170,29 @@ export const modalBlockWithContext = ({
 	);
 };
 
-export const MessageBlock = ({ blocks }, context = contextDefault) => (
-	<kitContext.Provider value={context}>
-		{uiKitMessage(blocks)}
-	</kitContext.Provider>
-);
+export const MessageBlock = (props) => {
+	const context = {
+		action: (options) => {
+			const { actionId, value, blockId, mid = props.mid } = options;
+			ActionManager.triggerBlockAction({
+				blockId,
+				actionId,
+				value,
+				mid,
+				rid: props.rid,
+				appId: props.blocks[0].appId,
+				container: {
+					type: UIKitIncomingInteractionContainerType.MESSAGE,
+					id: mid,
+				},
+			});
+		},
+		// state: alert,
+		appId: props.appId,
+		rid: props.rid,
+	};
+
+	return <kitContext.Provider value={context}>
+		{uiKitMessage(props.blocks)}
+	</kitContext.Provider>;
+};
