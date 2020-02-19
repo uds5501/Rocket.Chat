@@ -1,9 +1,14 @@
 import { Box, Field, Flex, Icon } from '@rocket.chat/fuselage';
-import { Blaze } from 'meteor/blaze';
 import { Template } from 'meteor/templating';
 import React, { useRef, useEffect, useLayoutEffect } from 'react';
 
 import { ResetSettingButton } from '../ResetSettingButton';
+import { createComponentFromTemplate } from '../../../../lib/createComponentFromTemplate';
+
+const InputAutocomplete = createComponentFromTemplate(
+	Template.inputAutocomplete,
+	(ref) => <div style={{ position: 'relative' }} ref={ref} />,
+);
 
 export function RoomPickSettingInput({
 	_id,
@@ -31,15 +36,31 @@ export function RoomPickSettingInput({
 	});
 
 	useEffect(() => {
-		const view = Blaze.renderWithData(Template.inputAutocomplete, {
-			id: _id,
-			name: _id,
-			class: 'search autocomplete rc-input__element',
-			autocomplete: autocomplete === false ? 'off' : undefined,
-			readOnly: readonly,
-			placeholder,
-			disabled,
-			settings: {
+		$('.autocomplete', wrapperRef.current).on('autocompleteselect', (event, doc) => {
+			const { current: value } = valueRef;
+			onChangeValue([...value.filter(({ _id }) => _id !== doc._id), doc]);
+			event.currentTarget.value = '';
+			event.currentTarget.focus();
+		});
+	}, []);
+
+	return <>
+		<Flex.Container>
+			<Box>
+				<Field.Label htmlFor={_id} title={_id}>{label}</Field.Label>
+				{hasResetButton && <ResetSettingButton data-qa-reset-setting-id={_id} onClick={onResetButtonClick} />}
+			</Box>
+		</Flex.Container>
+		<InputAutocomplete
+			ref={wrapperRef}
+			id={_id}
+			name={_id}
+			class='search autocomplete rc-input__element'
+			autocomplete={autocomplete === false ? 'off' : undefined}
+			readOnly={readonly}
+			placeholder={placeholder}
+			disabled={disabled}
+			settings={{
 				limit: 10,
 				// inputDelay: 300
 				rules: [
@@ -55,30 +76,8 @@ export function RoomPickSettingInput({
 						sort: 'name',
 					},
 				],
-			},
-
-		}, wrapperRef.current);
-
-		$('.autocomplete', wrapperRef.current).on('autocompleteselect', (event, doc) => {
-			const { current: value } = valueRef;
-			onChangeValue([...value.filter(({ _id }) => _id !== doc._id), doc]);
-			event.currentTarget.value = '';
-			event.currentTarget.focus();
-		});
-
-		return () => {
-			Blaze.remove(view);
-		};
-	}, [valueRef]);
-
-	return <>
-		<Flex.Container>
-			<Box>
-				<Field.Label htmlFor={_id} title={_id}>{label}</Field.Label>
-				{hasResetButton && <ResetSettingButton data-qa-reset-setting-id={_id} onClick={onResetButtonClick} />}
-			</Box>
-		</Flex.Container>
-		<div style={{ position: 'relative' }} ref={wrapperRef} />
+			}}
+		/>
 		<ul className='selected-rooms'>
 			{value.map(({ _id, name }) =>
 				<li key={_id} className='remove-room' onClick={handleRemoveRoomButtonClick(_id)}>
