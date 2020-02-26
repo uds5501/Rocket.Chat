@@ -42,13 +42,13 @@ Meteor.startup(() => {
 		const [
 			{ createElement },
 			{ render },
-			{ MeteorProvider },
+			{ App },
 		] = await Promise.all([
 			import('react'),
 			import('react-dom'),
-			import('../providers/MeteorProvider'),
+			import('../components/App'),
 		]);
 
-		render(createElement(MeteorProvider, {}, ...portalsMap.values()), rootNode);
+		render(createElement(App, { portals: Array.from(portalsMap.values()) }), rootNode);
 	});
 });
