@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useTranslation } from '../../../contexts/TranslationContext';
 import { DescriptionList } from './DescriptionList';
-import { formatDate } from './formatters';
+import { formatDateAndTime } from '../../../../app/lib/client/lib/formatDate';
 
 export function BuildEnvironmentSection({ info }) {
 	const t = useTranslation();
@@ -16,7 +16,7 @@ export function BuildEnvironmentSection({ info }) {
 			<DescriptionList.Entry label={t('OS_Arch')}>{build.arch}</DescriptionList.Entry>
 			<DescriptionList.Entry label={t('OS_Release')}>{build.osRelease}</DescriptionList.Entry>
 			<DescriptionList.Entry label={t('Node_version')}>{build.nodeVersion}</DescriptionList.Entry>
-			<DescriptionList.Entry label={t('Date')}>{formatDate(build.date)}</DescriptionList.Entry>
+			<DescriptionList.Entry label={t('Date')}>{build.date ? formatDateAndTime(build.date) : null}</DescriptionList.Entry>
 		</DescriptionList>
 	</>;
 }

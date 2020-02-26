@@ -1,4 +1,3 @@
-import moment from 'moment';
 import s from 'underscore.string';
 
 export const formatNumber = (number) => s.numberFormat(number, 2);
@@ -22,14 +21,6 @@ export const formatMemorySize = (memorySize) => {
 	const divider = Math.pow(1024, order);
 	const decimalDigits = order === 0 ? 0 : 2;
 	return `${ s.numberFormat(memorySize / divider, decimalDigits) } ${ units[order] }`;
-};
-
-export const formatDate = (date) => {
-	if (!date) {
-		return null;
-	}
-
-	return moment(date).format('LLL');
 };
 
 export const formatHumanReadableTime = (time, t) => {

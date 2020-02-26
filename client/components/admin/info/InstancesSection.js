@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useTranslation } from '../../../contexts/TranslationContext';
 import { DescriptionList } from './DescriptionList';
-import { formatDate } from './formatters';
+import { formatDateAndTime } from '../../../../app/lib/client/lib/formatDate';
 
 export function InstancesSection({ instances }) {
 	const t = useTranslation();
@@ -23,8 +23,8 @@ export function InstancesSection({ instances }) {
 				<DescriptionList.Entry label={<>{t('Current_Status')} > {t('Status')}</>}>{currentStatus.status}</DescriptionList.Entry>
 				<DescriptionList.Entry label={<>{t('Instance_Record')} > {t('ID')}</>}>{instanceRecord._id}</DescriptionList.Entry>
 				<DescriptionList.Entry label={<>{t('Instance_Record')} > {t('PID')}</>}>{instanceRecord.pid}</DescriptionList.Entry>
-				<DescriptionList.Entry label={<>{t('Instance_Record')} > {t('Created_at')}</>}>{formatDate(instanceRecord._createdAt)}</DescriptionList.Entry>
-				<DescriptionList.Entry label={<>{t('Instance_Record')} > {t('Updated_at')}</>}>{formatDate(instanceRecord._updatedAt)}</DescriptionList.Entry>
+				<DescriptionList.Entry label={<>{t('Instance_Record')} > {t('Created_at')}</>}>{instanceRecord._createdAt ? formatDateAndTime(instanceRecord._createdAt) : null}</DescriptionList.Entry>
+				<DescriptionList.Entry label={<>{t('Instance_Record')} > {t('Updated_at')}</>}>{instanceRecord._updatedAt ? formatDateAndTime(instanceRecord._updatedAt) : null}</DescriptionList.Entry>
 			</DescriptionList>,
 		)}
 	</>;

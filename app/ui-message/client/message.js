@@ -5,8 +5,7 @@ import { Tracker } from 'meteor/tracker';
 import { Template } from 'meteor/templating';
 import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
 
-import { timeAgo, formatDateAndTime } from '../../lib/client/lib/formatDate';
-import { DateFormat } from '../../lib/client';
+import { timeAgo, formatDateAndTime, formatDate, formatTime } from '../../lib/client/lib/formatDate';
 import { renderMessageBody, MessageTypes, MessageAction, call, normalizeThreadMessage } from '../../ui-utils/client';
 import { RoomRoles, UserRoles, Roles, Messages } from '../../models/client';
 import { callbacks } from '../../callbacks/client';
@@ -214,11 +213,11 @@ Template.message.helpers({
 	time() {
 		const { msg, timeAgo: useTimeAgo } = this;
 
-		return useTimeAgo ? timeAgo(msg.ts) : DateFormat.formatTime(msg.ts);
+		return useTimeAgo ? timeAgo(msg.ts) : formatTime(msg.ts);
 	},
 	date() {
 		const { msg } = this;
-		return DateFormat.formatDate(msg.ts);
+		return formatDate(msg.ts);
 	},
 	isTemp() {
 		const { msg } = this;
@@ -256,7 +255,7 @@ Template.message.helpers({
 	},
 	editTime() {
 		const { msg } = this;
-		return msg.editedAt ? DateFormat.formatDateAndTime(msg.editedAt) : '';
+		return msg.editedAt ? formatDateAndTime(msg.editedAt) : '';
 	},
 	editedBy() {
 		const { msg } = this;

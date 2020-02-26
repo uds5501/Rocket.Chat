@@ -2,7 +2,8 @@ import { Skeleton, Subtitle } from '@rocket.chat/fuselage';
 import React from 'react';
 
 import { useTranslation } from '../../../contexts/TranslationContext';
-import { formatDate, formatHumanReadableTime } from './formatters';
+import { formatDateAndTime } from '../../../../app/lib/client/lib/formatDate';
+import { formatHumanReadableTime } from './formatters';
 import { DescriptionList } from './DescriptionList';
 
 export function RocketChatSection({ info, statistics, isLoading }) {
@@ -17,8 +18,8 @@ export function RocketChatSection({ info, statistics, isLoading }) {
 			<DescriptionList.Entry label={t('Version')}>{s(() => statistics.version)}</DescriptionList.Entry>
 			{appsEngineVersion && <DescriptionList.Entry label={t('Apps_Engine_Version')}>{appsEngineVersion}</DescriptionList.Entry>}
 			<DescriptionList.Entry label={t('DB_Migration')}>{s(() => statistics.migration.version)}</DescriptionList.Entry>
-			<DescriptionList.Entry label={t('DB_Migration_Date')}>{s(() => formatDate(statistics.migration.lockedAt))}</DescriptionList.Entry>
-			<DescriptionList.Entry label={t('Installed_at')}>{s(() => formatDate(statistics.installedAt))}</DescriptionList.Entry>
+			<DescriptionList.Entry label={t('DB_Migration_Date')}>{s(() => (statistics.migration.lockedAt ? formatDateAndTime(statistics.migration.lockedAt) : null))}</DescriptionList.Entry>
+			<DescriptionList.Entry label={t('Installed_at')}>{s(() => (statistics.installedAt ? formatDateAndTime(statistics.installedAt) : null))}</DescriptionList.Entry>
 			<DescriptionList.Entry label={t('Uptime')}>{s(() => formatHumanReadableTime(statistics.process.uptime, t))}</DescriptionList.Entry>
 			<DescriptionList.Entry label={t('Deployment_ID')}>{s(() => statistics.uniqueId)}</DescriptionList.Entry>
 			<DescriptionList.Entry label={t('PID')}>{s(() => statistics.process.pid)}</DescriptionList.Entry>
