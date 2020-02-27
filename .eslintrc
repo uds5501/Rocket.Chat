@@ -11,7 +11,8 @@
     "jscolor": false
   },
   "plugins": [
-    "react"
+    "react",
+    "react-hooks"
   ],
   "rules": {
     "jsx-quotes": [
@@ -25,11 +26,13 @@
       "error",
       "syntax"
     ],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
   "settings": {
     "react": {
-      "version": "detect",
-    },
+      "version": "detect"
+    }
   },
   "overrides": [
     {
@@ -72,6 +75,8 @@
           "error",
           "syntax"
         ],
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn",
         "@typescript-eslint/ban-ts-ignore": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/interface-name-prefix": [

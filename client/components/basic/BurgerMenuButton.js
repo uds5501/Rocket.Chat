@@ -2,13 +2,13 @@ import { Box } from '@rocket.chat/fuselage';
 import React from 'react';
 
 import './BurgerMenuButton.css';
+import { useQueryStringParameter } from '../../contexts/RouterContext';
 import { useSession } from '../../contexts/SessionContext';
 import { useSidebar } from '../../contexts/SidebarContext';
-import { useEmbeddedLayout } from '../../hooks/useEmbeddedLayout';
 
 export const BurgerMenuButton = () => {
 	const [isSidebarOpen, setSidebarOpen] = useSidebar();
-	const isLayoutEmbedded = useEmbeddedLayout();
+	const isLayoutEmbedded = useQueryStringParameter('layout') === 'embedded';
 	const unreadMessagesBadge = useSession('unread');
 
 	const handleClick = () => {
