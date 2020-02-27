@@ -1,4 +1,5 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
+import { useSubscription } from 'use-subscription';
 
 export const ConnectionStatusContext = createContext({
 	connected: true,
@@ -8,4 +9,22 @@ export const ConnectionStatusContext = createContext({
 	reconnect: () => {},
 });
 
-export const useConnectionStatus = () => useContext(ConnectionStatusContext);
+export const useConnectionStatus = () => {
+	const value = useContext(ConnectionStatusContext);
+
+	const subscription = useMemo(() => {
+		if (value.subscription) {
+			return value.subscription;
+		}
+
+		return {
+			getCurrentValue: () => value,
+			subscribe: () => () => {},
+		};
+	}, [value]);
+
+	return {
+		...useSubscription(subscription),
+		reconnect: value.reconnect,
+	};
+};
