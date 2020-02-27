@@ -13,8 +13,11 @@ export const useConnectionStatus = () => {
 	const value = useContext(ConnectionStatusContext);
 
 	const subscription = useMemo(() => {
-		if (value.subscription) {
-			return value.subscription;
+		if (value.getCurrentValue && value.subscribe) {
+			return {
+				getCurrentValue: value.getCurrentValue,
+				subscribe: value.subscribe,
+			};
 		}
 
 		return {

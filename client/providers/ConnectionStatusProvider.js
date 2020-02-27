@@ -1,26 +1,16 @@
 import { Meteor } from 'meteor/meteor';
-import { Tracker } from 'meteor/tracker';
 import React, { useMemo } from 'react';
 
 import { ConnectionStatusContext } from '../contexts/ConnectionStatusContext';
+import { useReactiveValueAsSubscription } from '../hooks/useReactiveValueAsSubscription';
 
 export function ConnectionStatusProvider({ children }) {
-	const value = useMemo(() => ({
-		subscription: {
-			getCurrentValue: () => Tracker.nonreactive(() => ({ ...Meteor.status() })),
-			subscribe: (callback) => {
-				const computation = Tracker.autorun(() => {
-					Meteor.status();
-					callback();
-				});
+	const subscription = useReactiveValueAsSubscription(() => ({ ...Meteor.status() }));
 
-				return () => {
-					computation.stop();
-				};
-			},
-		},
+	const value = useMemo(() => ({
+		...subscription,
 		reconnect: Meteor.reconnect,
-	}), []);
+	}), [subscription]);
 
 	return <ConnectionStatusContext.Provider children={children} value={value} />;
 }
