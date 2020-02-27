@@ -1,11 +1,8 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 export const useMutableCallback = (callback) => {
-	const ref = useRef(callback);
-
-	useEffect(() => {
-		ref.current = callback;
-	});
+	const ref = useRef();
+	ref.current = callback;
 
 	return useCallback((...args) => (0, ref.current)(...args), [ref]);
 };

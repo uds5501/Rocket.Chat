@@ -2,6 +2,7 @@ import { useDebouncedCallback } from '@rocket.chat/fuselage-hooks';
 import { Mongo } from 'meteor/mongo';
 import { Tracker } from 'meteor/tracker';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useSubscription } from 'use-subscription';
 
 import { PrivateSettingsCachedCollection } from '../../../../app/ui-admin/client/SettingsCachedCollection';
 import { useBatchSettingsDispatch } from '../../../contexts/SettingsContext';
@@ -165,8 +166,8 @@ export function SettingsState({ children }) {
 		});
 
 		return () => {
-			syncCollectionsHandle && syncCollectionsHandle.stop();
-			syncStateHandle && syncStateHandle.stop();
+			syncCollectionsHandle.stop();
+			syncStateHandle.stop();
 			clearTimeout(addedActionTimer);
 		};
 	}, [isLoading, collectionsRef]);
@@ -217,31 +218,29 @@ export function SettingsState({ children }) {
 	return <SettingsContext.Provider children={children} value={contextValue} />;
 }
 
-const useSelector = (selector, equalityFunction = (a, b) => a === b) => {
+const useSelector = (selector, equalityFn = Object.is) => {
 	const { subscribers, stateRef } = useContext(SettingsContext);
-	const [value, setValue] = useState(() => selector(stateRef.current));
 
-	const handleUpdate = useMutableCallback((state) => {
-		const newValue = selector(state);
+	const getCurrentValueRef = useRef();
 
-		if (!equalityFunction(newValue, value)) {
-			setValue(newValue);
-		}
-	});
+	const newGetCurrentValue = () => selector(stateRef.current);
+	if (getCurrentValueRef.current === undefined || !equalityFn((0, getCurrentValueRef.current)(), newGetCurrentValue())) {
+		getCurrentValueRef.current = newGetCurrentValue;
+	}
 
-	useEffect(() => {
-		subscribers.add(handleUpdate);
+	const getCurrentValue = getCurrentValueRef.current;
 
+	const subscribe = useCallback((callback) => {
+		subscribers.add(callback);
 		return () => {
-			subscribers.delete(handleUpdate);
+			subscribers.delete(callback);
 		};
-	}, [subscribers, handleUpdate]);
+	}, [subscribers]);
 
-	useEffect(() => {
-		handleUpdate(stateRef.current);
+	return useSubscription({
+		getCurrentValue,
+		subscribe,
 	});
-
-	return value;
 };
 
 export const useGroup = (groupId) => {
