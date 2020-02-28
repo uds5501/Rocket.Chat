@@ -12,7 +12,6 @@ import { useReactiveValue } from '../../../hooks/useReactiveValue';
 import { useTranslation, useLoadLanguage } from '../../../contexts/TranslationContext';
 import { useUser } from '../../../contexts/UserContext';
 
-
 const SettingsContext = createContext({});
 
 let privateSettingsCachedCollection; // Remove this singleton (╯°□°)╯︵ ┻━┻
@@ -27,30 +26,26 @@ const getPrivateSettingsCachedCollection = () => {
 	return [privateSettingsCachedCollection, privateSettingsCachedCollection.init()];
 };
 
-const compareStrings = (a = '', b = '') => {
-	if (a === b || (!a && !b)) {
-		return 0;
-	}
-
-	return a > b ? 1 : -1;
-};
-
 const compareSettings = (a, b) =>
-	compareStrings(a.section, b.section)
-	|| compareStrings(a.sorter, b.sorter)
-	|| compareStrings(a.i18nLabel, b.i18nLabel);
+	(a.section || '').localeCompare(b.section || '')
+	|| ((a.sorter || 0) - (b.sorter || 0))
+	|| (a.i18nLabel || '').localeCompare(b.i18nLabel || '');
 
-const settingsReducer = (states, { type, payload }) => {
+const reducer = (state, { type, payload }) => {
 	const {
 		settings,
 		persistedSettings,
-	} = states;
+	} = state;
 
 	switch (type) {
 		case 'add': {
+			if (payload.length === 0) {
+				return state;
+			}
+
 			return {
-				settings: [...settings, ...payload].sort(compareSettings),
-				persistedSettings: [...persistedSettings, ...payload].sort(compareSettings),
+				settings: [...payload, ...settings].sort(compareSettings),
+				persistedSettings: [...payload, ...persistedSettings].sort(compareSettings),
 			};
 		}
 
@@ -87,29 +82,27 @@ const settingsReducer = (states, { type, payload }) => {
 		}
 	}
 
-	return states;
+	return state;
 };
 
 export function SettingsState({ children }) {
-	const [isLoading, setLoading] = useState(true);
+	const [state, dispatch] = useReducer(reducer, null, () => ({
+		settings: [],
+		persistedSettings: [],
+	}));
+
+	const stateRef = useRef();
+	stateRef.current = state;
 
 	const [subscribers] = useState(new Set());
 
-	const stateRef = useRef({ settings: [], persistedSettings: [] });
+	useEffect(() => {
+		for (const subscriber of subscribers) {
+			subscriber();
+		}
+	}, [subscribers, state]);
 
-	const enhancedReducer = useCallback((state, action) => {
-		const newState = settingsReducer(state, action);
-
-		stateRef.current = newState;
-
-		subscribers.forEach((subscriber) => {
-			subscriber(newState);
-		});
-
-		return newState;
-	}, [subscribers]);
-
-	const [, dispatch] = useReducer(enhancedReducer, { settings: [], persistedSettings: [] });
+	const [isLoading, setLoading] = useState(true);
 
 	const collectionsRef = useRef({});
 
