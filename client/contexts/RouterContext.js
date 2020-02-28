@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo, useDebugValue } from 'react';
 import { useSubscription } from 'use-subscription';
 
 export const RouterContext = createContext({
@@ -21,11 +21,17 @@ export const useRoute = (pathDefinition) => {
 export const useRouteParameter = (name) => {
 	const { subscribeToRouteParameter } = useContext(RouterContext);
 	const subscription = useMemo(() => subscribeToRouteParameter(name), [subscribeToRouteParameter, name]);
-	return useSubscription(subscription);
+	const value = useSubscription(subscription);
+
+	useDebugValue(value);
+	return value;
 };
 
 export const useQueryStringParameter = (name) => {
 	const { subscribeToQueryStringParameter } = useContext(RouterContext);
 	const subscription = useMemo(() => subscribeToQueryStringParameter(name), [subscribeToQueryStringParameter, name]);
-	return useSubscription(subscription);
+	const value = useSubscription(subscription);
+
+	useDebugValue(value);
+	return value;
 };
