@@ -1,7 +1,34 @@
-import React, { useLayoutEffect } from 'react';
+import Clipboard from 'clipboard';
+import React, { useLayoutEffect, useEffect } from 'react';
 
 import { MeteorProvider } from '../providers/MeteorProvider';
 import { useReactiveValue } from '../hooks/useReactiveValue';
+import { useSetting } from '../contexts/SettingsContext';
+
+function GoogleTagManager() {
+	const tagManagerId = useSetting('GoogleTagManager_id');
+
+	useEffect(() => {
+		if (window.dataLayer && window.dataLayer.length > 0) {
+			return;
+		}
+
+		if (typeof tagManagerId === 'string' && tagManagerId.trim() !== '') {
+			window.dataLayer = window.dataLayer || [];
+			window.dataLayer.push({
+				'gtm.start': new Date().getTime(),
+				event: 'gtm.js',
+			});
+			const f = document.getElementsByTagName('script')[0];
+			const j = document.createElement('script');
+			j.async = true;
+			j.src = `//www.googletagmanager.com/gtm.js?id=${ tagManagerId }`;
+			f.parentNode.insertBefore(j, f);
+		}
+	}, [tagManagerId]);
+
+	return null;
+}
 
 export function App({ getPortals }) {
 	useLayoutEffect(() => {
@@ -26,6 +53,14 @@ export function App({ getPortals }) {
 		};
 	}, []);
 
+	useEffect(() => {
+		const clipboard = new Clipboard('.clipboard');
+
+		return () => {
+			clipboard.destroy();
+		};
+	}, []);
+
 	const portals = useReactiveValue(getPortals);
 
 	return <MeteorProvider>
@@ -35,5 +70,6 @@ export function App({ getPortals }) {
 			<div className='tooltip-arrow' />
 		</div>
 		{portals}
+		<GoogleTagManager />
 	</MeteorProvider>;
 }

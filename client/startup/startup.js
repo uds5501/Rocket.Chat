@@ -5,10 +5,14 @@ import { TimeSync } from 'meteor/mizzao:timesync';
 import { UserPresence } from 'meteor/konecty:user-presence';
 import { Accounts } from 'meteor/accounts-base';
 import toastr from 'toastr';
+import s from 'underscore.string';
 
+import { t, getUserPreference } from '../../app/utils/client';
+import { chatMessages } from '../../app/ui';
+import { Layout, modal, popover, fireGlobalEvent, RoomManager } from '../../app/ui-utils';
+import { toolbarSearch } from '../../app/ui-sidenav';
+import { ChatSubscription } from '../../app/models';
 import hljs from '../../app/markdown/lib/hljs';
-import { fireGlobalEvent } from '../../app/ui-utils';
-import { getUserPreference } from '../../app/utils';
 import 'highlight.js/styles/github.css';
 import { syncUserdata } from '../lib/userData';
 
@@ -59,6 +63,93 @@ Meteor.startup(function() {
 		if (user.status !== status) {
 			status = user.status;
 			fireGlobalEvent('status-changed', status);
+		}
+	});
+});
+
+Meteor.startup(() => {
+	$(document.body).on('keydown', function(e) {
+		if ((e.keyCode === 80 || e.keyCode === 75) && (e.ctrlKey === true || e.metaKey === true) && e.shiftKey === false) {
+			e.preventDefault();
+			e.stopPropagation();
+			toolbarSearch.show(true);
+		}
+		const unread = Session.get('unread');
+		if (e.keyCode === 27 && (e.shiftKey === true || e.ctrlKey === true) && unread && unread !== '') {
+			e.preventDefault();
+			e.stopPropagation();
+			modal.open({
+				title: t('Clear_all_unreads_question'),
+				type: 'warning',
+				confirmButtonText: t('Yes_clear_all'),
+				showCancelButton: true,
+				cancelButtonText: t('Cancel'),
+				confirmButtonColor: '#DD6B55',
+			}, function() {
+				const subscriptions = ChatSubscription.find({
+					open: true,
+				}, {
+					fields: {
+						unread: 1,
+						alert: 1,
+						rid: 1,
+						t: 1,
+						name: 1,
+						ls: 1,
+					},
+				});
+
+				subscriptions.forEach((subscription) => {
+					if (subscription.alert || subscription.unread > 0) {
+						Meteor.call('readMessages', subscription.rid);
+					}
+				});
+			});
+		}
+	});
+
+	$(document.body).on('keydown', function(e) {
+		const { target } = e;
+		if (e.ctrlKey === true || e.metaKey === true) {
+			popover.close();
+			return;
+		}
+		if (!((e.keyCode > 45 && e.keyCode < 91) || e.keyCode === 8)) {
+			return;
+		}
+
+		if (/input|textarea|select/i.test(target.tagName)) {
+			return;
+		}
+		if (target.id === 'pswp') {
+			return;
+		}
+
+		popover.close();
+
+		if (document.querySelector('.rc-modal-wrapper dialog[open]')) {
+			return;
+		}
+
+		const inputMessage = chatMessages[RoomManager.openedRoom] && chatMessages[RoomManager.openedRoom].input;
+		if (!inputMessage) {
+			return;
+		}
+		inputMessage.focus();
+	});
+
+	const handleMessageLinkClick = (event) => {
+		const link = event.currentTarget;
+		if (link.origin === s.rtrim(Meteor.absoluteUrl(), '/') && /msg=([a-zA-Z0-9]+)/.test(link.search)) {
+			fireGlobalEvent('click-message-link', { link: link.pathname + link.search });
+		}
+	};
+
+	Tracker.autorun(() => {
+		if (Layout.isEmbedded()) {
+			$(document.body).on('click', 'a', handleMessageLinkClick);
+		} else {
+			$(document.body).off('click', 'a', handleMessageLinkClick);
 		}
 	});
 });
