@@ -2,14 +2,11 @@ import { Box, Button, ButtonGroup, Flex, Margins } from '@rocket.chat/fuselage';
 import React from 'react';
 
 import { useRoute } from '../../contexts/RouterContext';
-import { useWipeInitialPageLoading } from '../../hooks/useWipeInitialPageLoading';
 import { ConnectionStatusAlert } from '../connectionStatus/ConnectionStatusAlert';
 import { useTranslation } from '../../contexts/TranslationContext';
 import './PageNotFound.css';
 
 export function PageNotFound() {
-	useWipeInitialPageLoading();
-
 	const t = useTranslation();
 	const goToHome = useRoute('home');
 

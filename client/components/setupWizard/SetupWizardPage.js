@@ -2,7 +2,6 @@ import { Box, Margins, Scrollable, Tile } from '@rocket.chat/fuselage';
 import React from 'react';
 
 import { useTranslation } from '../../contexts/TranslationContext';
-import { useWipeInitialPageLoading } from '../../hooks/useWipeInitialPageLoading';
 import { ConnectionStatusAlert } from '../connectionStatus/ConnectionStatusAlert';
 import { finalStep } from './SetupWizardState';
 import { FinalStep } from './steps/FinalStep';
@@ -14,7 +13,6 @@ import { RegisterServerStep } from './steps/RegisterServerStep';
 import './SetupWizardPage.css';
 
 export function SetupWizardPage({ currentStep = 1 }) {
-	useWipeInitialPageLoading();
 	const t = useTranslation();
 
 	return <>
