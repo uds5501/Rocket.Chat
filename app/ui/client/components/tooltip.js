@@ -1,19 +1,4 @@
-import { Template } from 'meteor/templating';
-import { Blaze } from 'meteor/blaze';
-
-import './tooltip.html';
 import './tooltip.css';
-
-let initiated = false;
-
-const init = () => {
-	if (initiated) {
-		return;
-	}
-	initiated = true;
-
-	Blaze.render(Template.tooltip, document.body);
-};
 
 let source = null;
 let opened = false;
@@ -88,7 +73,6 @@ const hide = () => {
 };
 
 export const tooltip = {
-	init,
 	showElement,
 	hide,
 };

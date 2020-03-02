@@ -148,10 +148,6 @@ Template.body.onRendered(function() {
 	});
 });
 
-Template.main.onCreated(function() {
-	tooltip.init();
-});
-
 Template.main.helpers({
 	removeSidenav() {
 		return Layout.isEmbedded() && !/^\/admin/.test(FlowRouter.current().route.path);

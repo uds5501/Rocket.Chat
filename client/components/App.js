@@ -4,8 +4,6 @@ import { MeteorProvider } from '../providers/MeteorProvider';
 import { useReactiveValue } from '../hooks/useReactiveValue';
 
 export function App({ getPortals }) {
-	const portals = useReactiveValue(getPortals);
-
 	useLayoutEffect(() => {
 		document.body.classList.add('global-font-family', 'color-primary-font-color');
 
@@ -28,8 +26,14 @@ export function App({ getPortals }) {
 		};
 	}, []);
 
+	const portals = useReactiveValue(getPortals);
+
 	return <MeteorProvider>
 		<div id='alert-anchor' />
+		<div className='tooltip'>
+			<div className='content' />
+			<div className='tooltip-arrow' />
+		</div>
 		{portals}
 	</MeteorProvider>;
 }
