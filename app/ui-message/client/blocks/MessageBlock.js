@@ -69,11 +69,11 @@ export const modalBlockWithContext = ({
 			const element = ref.current.querySelector(focusableElementsString);
 			element && element.focus();
 		}
-	}, [ref.current, data.errors]);
+	}, [data]);
 	// save focus to restore after close
 	const previousFocus = useMemo(() => document.activeElement, []);
 	// restore the focus after the component unmount
-	useEffect(() => () => previousFocus && previousFocus.focus(), []);
+	useEffect(() => () => previousFocus && previousFocus.focus(), [previousFocus]);
 	// Handle Tab, Shift + Tab, Enter and Escape
 	const handleKeyDown = useCallback((event) => {
 		if (event.keyCode === 13) { // ENTER
@@ -111,7 +111,7 @@ export const modalBlockWithContext = ({
 				event.preventDefault();
 			}
 		}
-	}, [onSubmit]);
+	}, []);
 	// Clean the events
 	useEffect(() => {
 		const element = document.querySelector('.rc-modal-wrapper');
@@ -139,7 +139,7 @@ export const modalBlockWithContext = ({
 			document.removeEventListener('keydown', ignoreIfnotContains);
 			element.removeEventListener('click', close);
 		};
-	}, handleKeyDown);
+	}, [handleKeyDown]);
 
 	return (
 		<kitContext.Provider value={{ ...context, ...data, values }}>
@@ -255,7 +255,7 @@ export function ModalBlock({ errors: initialErrors, ...initialBlockState }) {
 		return () => {
 			ActionManager.off(viewId, handleUpdate);
 		};
-	}, []);
+	}, [errors, viewId, state]);
 
 	const prevent = (e) => {
 		if (e) {

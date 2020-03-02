@@ -72,7 +72,7 @@ const useParameters = () => {
 		return () => {
 			mounted = false;
 		};
-	}, []);
+	}, [getSetupWizardParameters]);
 
 	return {
 		loaded,
@@ -98,9 +98,9 @@ export function SetupWizardState() {
 		canDeclineServerRegistration,
 	} = useParameters();
 
-	const goToPreviousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
-	const goToNextStep = useCallback(() => setCurrentStep((currentStep) => currentStep + 1), []);
-	const goToFinalStep = useCallback(() => setCurrentStep(finalStep), []);
+	const goToPreviousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), [setCurrentStep]);
+	const goToNextStep = useCallback(() => setCurrentStep((currentStep) => currentStep + 1), [setCurrentStep]);
+	const goToFinalStep = useCallback(() => setCurrentStep(finalStep), [setCurrentStep]);
 
 	const value = useMemo(() => ({
 		currentStep,
@@ -115,6 +115,9 @@ export function SetupWizardState() {
 		loaded,
 		settings,
 		canDeclineServerRegistration,
+		goToFinalStep,
+		goToNextStep,
+		goToPreviousStep,
 	]);
 
 	return <SetupWizardContext.Provider value={value}>

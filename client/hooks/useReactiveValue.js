@@ -13,6 +13,7 @@ export const useReactiveValue = (getValue, deps = []) => {
 		return () => {
 			computation.stop();
 		};
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, deps);
 
 	return value;

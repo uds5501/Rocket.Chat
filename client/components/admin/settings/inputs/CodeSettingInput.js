@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from '../../../../contexts/TranslationContext';
 import { ResetSettingButton } from '../ResetSettingButton';
+import { useMutableCallback } from '../../../../hooks/useMutableCallback';
 
 function CodeMirror({
 	lineNumbers = true,
@@ -26,6 +27,22 @@ function CodeMirror({
 	const [value, setValue] = useState(valueProp || defaultValue);
 	const ref = useRef();
 
+	const codeMirrorParamsRef = useRef({
+		lineNumbers,
+		lineWrapping,
+		mode,
+		gutters,
+		foldGutter,
+		matchBrackets,
+		autoCloseBrackets,
+		matchTags,
+		showTrailingSpace,
+		highlightSelectionMatches,
+		readOnly,
+	});
+
+	const stableOnChange = useMutableCallback(onChange);
+
 	useEffect(() => {
 		let editor;
 
@@ -40,24 +57,12 @@ function CodeMirror({
 				return;
 			}
 
-			editor = CodeMirror.fromTextArea(textarea, {
-				lineNumbers,
-				lineWrapping,
-				mode,
-				gutters,
-				foldGutter,
-				matchBrackets,
-				autoCloseBrackets,
-				matchTags,
-				showTrailingSpace,
-				highlightSelectionMatches,
-				readOnly,
-			});
+			editor = CodeMirror.fromTextArea(textarea, codeMirrorParamsRef.current);
 
 			editor.on('change', (doc) => {
 				const value = doc.getValue();
 				setValue(value);
-				onChange(value);
+				stableOnChange(value);
 			});
 
 			setEditor(editor);
@@ -72,7 +77,7 @@ function CodeMirror({
 
 			editor.toTextArea();
 		};
-	}, [ref]);
+	}, [ref, stableOnChange]);
 
 	useEffect(() => {
 		setValue(valueProp);

@@ -1,6 +1,6 @@
 import { Box, Field, Flex, Icon } from '@rocket.chat/fuselage';
 import { Template } from 'meteor/templating';
-import React, { useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import { ResetSettingButton } from '../ResetSettingButton';
 import { createComponentFromTemplate } from '../../../../lib/createComponentFromTemplate';
@@ -25,24 +25,28 @@ export function RoomPickSettingInput({
 	value = value || [];
 
 	const wrapperRef = useRef();
-	const valueRef = useRef(value);
 
 	const handleRemoveRoomButtonClick = (rid) => () => {
 		onChangeValue(value.filter(({ _id }) => _id !== rid));
 	};
 
-	useLayoutEffect(() => {
-		valueRef.current = value;
-	});
+	const valueRef = useRef(value);
+	valueRef.current = value;
 
 	useEffect(() => {
-		$('.autocomplete', wrapperRef.current).on('autocompleteselect', (event, doc) => {
+		const wrapper = wrapperRef.current;
+
+		$('.autocomplete', wrapper).on('autocompleteselect', (event, doc) => {
 			const { current: value } = valueRef;
 			onChangeValue([...value.filter(({ _id }) => _id !== doc._id), doc]);
 			event.currentTarget.value = '';
 			event.currentTarget.focus();
 		});
-	}, []);
+
+		return () => {
+			$('.autocomplete', wrapper).off('autocompleteselect');
+		};
+	}, [onChangeValue]);
 
 	return <>
 		<Flex.Container>

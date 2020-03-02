@@ -57,7 +57,7 @@ export function SettingsBasedStep({ step, title, active }) {
 				.sort(({ wizard: { order: a } }, { wizard: { order: b } }) => a - b)
 				.map(({ value, ...field }) => ({ ...field, value: value || '' })),
 		);
-	}, [settings, currentStep]);
+	}, [settings, currentStep, resetFields, step]);
 
 	const t = useTranslation();
 

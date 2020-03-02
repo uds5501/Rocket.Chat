@@ -1,7 +1,6 @@
 import { emitRoomDataEvent } from '../../stream/rooms';
 import { Rooms, Subscriptions } from '../../../app/models';
 import { Notifications } from '../../../app/notifications';
-
 import { fields } from '.';
 
 const getSubscriptions = (id) => {

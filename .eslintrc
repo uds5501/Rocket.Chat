@@ -104,6 +104,14 @@
           "version": "detect"
         }
       }
+    },
+    {
+      "files": [
+        "**/server/**/*.js"
+      ],
+      "rules": {
+        "react-hooks/rules-of-hooks": "off",
+      }
     }
   ]
 }

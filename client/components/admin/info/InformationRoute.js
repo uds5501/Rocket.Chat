@@ -53,7 +53,7 @@ export function InformationRoute() {
 		return () => {
 			didCancel = true;
 		};
-	}, [canViewStatistics]);
+	}, [canViewStatistics, getStatistics, getInstances]);
 
 	const info = useServerInformation();
 

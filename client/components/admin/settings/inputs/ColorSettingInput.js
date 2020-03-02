@@ -7,7 +7,7 @@ import {
 	TextInput,
 	Select,
 } from '@rocket.chat/fuselage';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { useTranslation } from '../../../../contexts/TranslationContext';
 import { ResetSettingButton } from '../ResetSettingButton';
@@ -29,13 +29,13 @@ export function ColorSettingInput({
 }) {
 	const t = useTranslation();
 
-	const handleChange = useCallback((event) => {
+	const handleChange = (event) => {
 		onChangeValue && onChangeValue(event.currentTarget.value);
-	}, []);
+	};
 
-	const handleEditorTypeChange = useCallback((value) => {
+	const handleEditorTypeChange = (value) => {
 		onChangeEditor && onChangeEditor(value);
-	}, []);
+	};
 
 	return <>
 		<Flex.Container>

@@ -23,6 +23,8 @@ export function GroupPage({ children, headerButtons, save, cancel, _id, i18nLabe
 		save();
 	};
 
+	const wrapperBoxStyle = useMemo(() => ({ margin: '0 auto', width: '100%', maxWidth: '590px' }), []);
+
 	if (!_id) {
 		return <Page>
 			<Page.Header />
@@ -47,7 +49,7 @@ export function GroupPage({ children, headerButtons, save, cancel, _id, i18nLabe
 		</Page.Header>
 
 		<Page.Content>
-			<Box style={useMemo(() => ({ margin: '0 auto', width: '100%', maxWidth: '590px' }), [])}>
+			<Box style={wrapperBoxStyle}>
 				{t.has(i18nDescription) && <Paragraph textColor='hint'>{t(i18nDescription)}</Paragraph>}
 
 				<Accordion className='page-settings'>

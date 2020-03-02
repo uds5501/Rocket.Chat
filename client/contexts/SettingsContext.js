@@ -20,5 +20,5 @@ export const useSettingDispatch = (name) => {
 
 export const useBatchSettingsDispatch = () => {
 	const { batchSet } = useContext(SettingsContext);
-	return useCallback((entries) => batchSet(entries), []);
+	return useCallback((entries) => batchSet(entries), [batchSet]);
 };
