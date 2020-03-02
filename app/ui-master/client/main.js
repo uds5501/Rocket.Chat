@@ -5,7 +5,7 @@ import { Session } from 'meteor/session';
 import { Template } from 'meteor/templating';
 
 import { getUserPreference } from '../../utils/client';
-import { mainReady, Layout, iframeLogin, menu, fireGlobalEvent } from '../../ui-utils';
+import { mainReady, Layout, iframeLogin } from '../../ui-utils';
 import { settings } from '../../settings';
 import { CachedChatSubscription, Roles, Users } from '../../models';
 import { CachedCollectionManager } from '../../ui-cached-collection';
@@ -32,9 +32,6 @@ callbacks.add('afterLogoutCleanUp', () => customScriptsOnLogout(), callbacks.pri
 Template.main.helpers({
 	removeSidenav() {
 		return Layout.isEmbedded() && !/^\/admin/.test(FlowRouter.current().route.path);
-	},
-	siteName() {
-		return settings.get('Site_Name');
 	},
 	logged() {
 		if (Meteor.userId() != null || (settings.get('Accounts_AllowAnonymousRead') === true && Session.get('forceLogin') !== true)) {
@@ -107,38 +104,31 @@ Template.main.helpers({
 	},
 });
 
-Template.main.events({
-	'click div.burger'() {
-		return menu.toggle();
-	},
-});
-
-Template.main.onRendered(function() {
-	return Tracker.autorun(function() {
+Template.main.onRendered(() => {
+	Tracker.autorun(() => {
 		const userId = Meteor.userId();
 		const Show_Setup_Wizard = settings.get('Show_Setup_Wizard');
 
 		if ((!userId && Show_Setup_Wizard === 'pending') || (userId && hasRole(userId, 'admin') && Show_Setup_Wizard === 'in_progress')) {
 			FlowRouter.go('setup-wizard');
 		}
+
 		if (getUserPreference(userId, 'hideUsernames')) {
-			$(document.body).on('mouseleave', 'button.thumb', function() {
-				return tooltip.hide();
+			$(document.body).on('mouseleave', 'button.thumb', () => {
+				tooltip.hide();
 			});
-			return $(document.body).on('mouseenter', 'button.thumb', function(e) {
+
+			$(document.body).on('mouseenter', 'button.thumb', (e) => {
 				const avatarElem = $(e.currentTarget);
 				const username = avatarElem.attr('data-username');
 				if (username) {
 					e.stopPropagation();
-					return tooltip.showElement($('<span>').text(username), avatarElem);
+					tooltip.showElement($('<span>').text(username), avatarElem);
 				}
 			});
 		}
-		$(document.body).off('mouseenter', 'button.thumb');
-		return $(document.body).off('mouseleave', 'button.thumb');
-	});
-});
 
-Meteor.startup(function() {
-	return fireGlobalEvent('startup', true);
+		$(document.body).off('mouseenter', 'button.thumb');
+		$(document.body).off('mouseleave', 'button.thumb');
+	});
 });

@@ -153,3 +153,7 @@ Meteor.startup(() => {
 		}
 	});
 });
+
+Meteor.startup(function() {
+	return fireGlobalEvent('startup', true);
+});
