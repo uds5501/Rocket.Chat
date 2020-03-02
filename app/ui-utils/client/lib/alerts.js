@@ -1,6 +1,7 @@
-import './alerts.html';
 import { Blaze } from 'meteor/blaze';
+import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import './alerts.html';
 
 export const alerts = {
 	renderedAlert: null,
@@ -13,7 +14,10 @@ export const alerts = {
 			this.timer = setTimeout(() => this.close(), config.timer);
 		}
 
-		this.renderedAlert = Blaze.renderWithData(Template.alerts, config, document.body, document.body.querySelector('#alert-anchor'));
+		Meteor.startup(() => {
+			const alertAnchor = document.getElementById('alert-anchor');
+			this.renderedAlert = Blaze.renderWithData(Template.alerts, config, alertAnchor.parentElement, alertAnchor);
+		});
 	},
 	close(dismiss = true) {
 		if (this.timer) {

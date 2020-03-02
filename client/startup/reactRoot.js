@@ -1,5 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
+import React from 'react';
+import { render } from 'react-dom';
+
+import { App } from '../components/App';
 
 const getRootNode = () => {
 	let rootNode = document.getElementById('react-root');
@@ -28,27 +32,11 @@ export const unregisterPortal = (key) => {
 };
 
 Meteor.startup(() => {
-	let pristine = true;
-	Tracker.autorun(async () => {
+	const rootNode = getRootNode();
+	const getPortals = () => {
 		portalsDep.depend();
+		return Array.from(portalsMap.values());
+	};
 
-		if (portalsMap.size === 0 && pristine) {
-			return;
-		}
-
-		pristine = false;
-
-		const rootNode = getRootNode();
-		const [
-			{ createElement },
-			{ render },
-			{ App },
-		] = await Promise.all([
-			import('react'),
-			import('react-dom'),
-			import('../components/App'),
-		]);
-
-		render(createElement(App, { portals: Array.from(portalsMap.values()) }), rootNode);
-	});
+	render(<App getPortals={getPortals} />, rootNode);
 });
