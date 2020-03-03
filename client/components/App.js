@@ -1,5 +1,7 @@
 import Clipboard from 'clipboard';
-import React, { useLayoutEffect, useEffect } from 'react';
+import { FlowRouter } from 'meteor/kadira:flow-router';
+import React, { useLayoutEffect, useEffect, Suspense, lazy, useState } from 'react';
+import { Tracker } from 'meteor/tracker';
 
 import { MeteorProvider } from '../providers/MeteorProvider';
 import { useReactiveValue } from '../hooks/useReactiveValue';
@@ -28,6 +30,34 @@ function GoogleTagManager() {
 	}, [tagManagerId]);
 
 	return null;
+}
+
+const PageNotFound = lazy(async () => ({ default: (await import('./pageNotFound/PageNotFound')).PageNotFound }));
+
+function Router() {
+	const [routeName, setRouteName] = useState(() => Tracker.nonreactive(() => FlowRouter.getRouteName()));
+	const [dep] = useState(() => new Tracker.Dependency());
+
+	useEffect(() => {
+		FlowRouter.notFound = {
+			action: () => {
+				dep.changed();
+			},
+		};
+
+		const c = Tracker.autorun(() => {
+			dep.depend();
+			setRouteName(FlowRouter.getRouteName());
+		});
+
+		return () => {
+			c.stop();
+		};
+	}, [dep]);
+
+	return <Suspense fallback={<></>}>
+		{!routeName && <PageNotFound />}
+	</Suspense>;
 }
 
 export function App({ getPortals }) {
@@ -61,7 +91,7 @@ export function App({ getPortals }) {
 		};
 	}, []);
 
-	const portals = useReactiveValue(getPortals);
+	const portals = useReactiveValue(getPortals, [getPortals]);
 
 	return <MeteorProvider>
 		<div id='alert-anchor' />
@@ -70,6 +100,7 @@ export function App({ getPortals }) {
 			<div className='tooltip-arrow' />
 		</div>
 		{portals}
+		<Router />
 		<GoogleTagManager />
 	</MeteorProvider>;
 }

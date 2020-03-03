@@ -56,14 +56,6 @@ FlowRouter.route('/', {
 	},
 });
 
-FlowRouter.route('/login', {
-	name: 'login',
-
-	action() {
-		FlowRouter.go('home');
-	},
-});
-
 FlowRouter.route('/home', {
 	name: 'home',
 
@@ -111,8 +103,7 @@ FlowRouter.route('/account/:group?', {
 
 FlowRouter.route('/terms-of-service', {
 	name: 'terms-of-service',
-
-	action() {
+	action: () => {
 		Session.set('cmsPage', 'Layout_Terms_of_Service');
 		BlazeLayout.render('cmsPage');
 	},
@@ -120,8 +111,7 @@ FlowRouter.route('/terms-of-service', {
 
 FlowRouter.route('/privacy-policy', {
 	name: 'privacy-policy',
-
-	action() {
+	action: () => {
 		Session.set('cmsPage', 'Layout_Privacy_Policy');
 		BlazeLayout.render('cmsPage');
 	},
@@ -129,8 +119,7 @@ FlowRouter.route('/privacy-policy', {
 
 FlowRouter.route('/legal-notice', {
 	name: 'legal-notice',
-
-	action() {
+	action: () => {
 		Session.set('cmsPage', 'Layout_Legal_Notice');
 		BlazeLayout.render('cmsPage');
 	},
@@ -138,8 +127,7 @@ FlowRouter.route('/legal-notice', {
 
 FlowRouter.route('/room-not-found/:type/:name', {
 	name: 'room-not-found',
-
-	action(params) {
+	action: (params) => {
 		Session.set('roomNotFound', { type: params.type, name: params.name });
 		BlazeLayout.render('main', { center: 'roomNotFound' });
 	},
@@ -147,27 +135,14 @@ FlowRouter.route('/room-not-found/:type/:name', {
 
 FlowRouter.route('/register/:hash', {
 	name: 'register-secret-url',
-
-	action(/* params*/) {
+	action: () => {
 		BlazeLayout.render('secretURL');
-
-		// if RocketChat.settings.get('Accounts_RegistrationForm') is 'Secret URL'
-		// 	Meteor.call 'checkRegistrationSecretURL', params.hash, (err, success) ->
-		// 		if success
-		// 			Session.set 'loginDefaultState', 'register'
-		// 			BlazeLayout.render 'main', {center: 'home'}
-		// 			KonchatNotification.getDesktopPermission()
-		// 		else
-		// 			BlazeLayout.render 'logoLayout', { render: 'invalidSecretURL' }
-		// else
-		// 	BlazeLayout.render 'logoLayout', { render: 'invalidSecretURL' }
 	},
 });
 
 FlowRouter.route('/invite/:hash', {
 	name: 'invite',
-
-	action(/* params */) {
+	action: () => {
 		BlazeLayout.render('invite');
 	},
 });
@@ -215,10 +190,5 @@ FlowRouter.route('/admin/:group?', {
 });
 
 FlowRouter.notFound = {
-	action: () => {
-		renderComponentIntoLayout('PageNotFound', async () => {
-			const { PageNotFound } = await import('./components/pageNotFound/PageNotFound');
-			return PageNotFound;
-		});
-	},
+	action: () => {},
 };
